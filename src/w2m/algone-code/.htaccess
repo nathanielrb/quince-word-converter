@@ -1,0 +1,9 @@
+
+Options +Indexes +FollowSymLinks -MultiViews
+RewriteEngine on
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+# évite RewriteBase, rappel avec %1, le ? permet de faire fonctionner la règle partout
+RewriteCond %{THE_REQUEST}      ^[^/]*(.*algone/)?
+# ne pas oublier [QSA] pour ajouter les paramètres
+RewriteRule   ^(.+)$      %1index.php/$1         [QSA,L]
