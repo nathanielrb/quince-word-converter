@@ -37,24 +37,19 @@
   (tei2markdown
    (odt2tei file)))
 
+(defn convert-file [file]
+  (odt2markdown (.getPath (:tempfile file))))
+
 (defn upload-file [params]
-  (let [file (get params "file")]
-    (println (get params "path"))
-    (println file)
-    (println (.getPath (:tempfile file)))
-    (response {:files (odt2markdown (.getPath (:tempfile file))) })))
-;;        (assoc-in [:headers "Access-Control-Allow-Origin"]  "*")
-;;        (assoc-in [:headers "Access-Control-Allow-Methods"] "GET,PUT,POST,DELETE,OPTIONS")
-;;        (assoc-in [:headers "Access-Control-Allow-Headers"] "X-Requested-With,Content-Type,Cache-Control"))))
+  (response {:files (convert-file (get params "file"))}))
 
 (defroutes app-routes
-  ;; (GET "/" [] "Hello World")
   (mp/wrap-multipart-params
    (wrap-json-response
     (POST "/upload" {params :params}
           (upload-file params))))
-  (route/not-found "Not Found"))
 
+  (route/not-found "Not Found"))
 
 (def cors-headers
   "Generic CORS headers"
