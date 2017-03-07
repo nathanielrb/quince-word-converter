@@ -70,7 +70,7 @@
     <xsl:text>}</xsl:text>
   </xsl:template>
   
-  <xsl:template match="tei:p[@rend]">
+  <xsl:template match="tei:p[@rend != 'figure']">
     <xsl:apply-templates/>
     <xsl:if test="not(fn:index-of($blocks, string(@rend)))">
       <xsl:call-template name="attr">
@@ -80,6 +80,23 @@
     <xsl:text>&#xa;</xsl:text>
     <xsl:text>&#xa;</xsl:text>
   </xsl:template>
+
+  <xsl:template match="tei:graphic">
+    <xsl:text>![</xsl:text>
+
+    <xsl:text>](</xsl:text>
+    <xsl:value-of select="fn:replace(@url, '^.+/','')"/>
+
+    <xsl:if test="following-sibling::tei:head">
+      <xsl:text> "</xsl:text>
+      <xsl:value-of select="following-sibling::tei:head"/>
+      <xsl:text>"</xsl:text>
+    </xsl:if>
+    
+    <xsl:text>)</xsl:text>
+  </xsl:template>
+
+  <xsl:template match="tei:p[@rend='figure']/tei:head"/>
 
   <xsl:template match="tei:div">
     <xsl:for-each-group select="*" group-adjacent="name(.)">
