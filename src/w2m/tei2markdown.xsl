@@ -12,16 +12,16 @@
   
   <xsl:template match="/">
     <documents>
-      <xsl:apply-templates select="//tei:body/tei:div[@type='chapter']
-				   | //tei:body[not(tei:div[@type='chapter'])]"/>
+      <xsl:apply-templates select="//tei:body/tei:div
+		       | //tei:body[not(child::*[1]/self::tei:div)]"/>
     </documents>
   </xsl:template>	
 
-  <xsl:template match="//tei:body/tei:div[@type='chapter']
-		       | //tei:body[not(tei:div[@type='chapter'])]">
+  <xsl:template match="//tei:body/tei:div
+		       | //tei:body[not(child::*[1]/self::tei:div)]">
     <document>
       <title>
-	<xsl:value-of select="tei:head[1]"/>
+	<xsl:value-of select="tei:head[1]/text()"/>
       </title>
       <body>
 	<xsl:apply-templates/>
