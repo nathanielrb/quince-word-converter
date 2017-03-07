@@ -11,14 +11,21 @@
   <xsl:variable name="blocks" select="fn:tokenize('sidebar',',')" />
   
   <xsl:template match="/">
-    <xsl:apply-templates select="//tei:body/tei:div[@type='chapter']
-				 | //tei:body[not(tei:div[@type='chapter'])]"/>
+    <documents>
+      <xsl:apply-templates select="//tei:body/tei:div[@type='chapter']
+				   | //tei:body[not(tei:div[@type='chapter'])]"/>
+    </documents>
   </xsl:template>	
 
   <xsl:template match="//tei:body/tei:div[@type='chapter']
 		       | //tei:body[not(tei:div[@type='chapter'])]">
     <document>
-      <xsl:apply-templates/>
+      <title>
+	<xsl:value-of select="tei:head[1]"/>
+      </title>
+      <body>
+	<xsl:apply-templates/>
+      </body>
     </document>
   </xsl:template>
   
@@ -81,13 +88,11 @@
 	  <xsl:for-each-group select="current-group()" group-adjacent="string(@rend)">
 	    <xsl:choose>
 	      <xsl:when test="fn:index-of($blocks, string(@rend))">
-		<xsl:text>&#xa;::: </xsl:text>
-		    <xsl:call-template name="attr">
-		      <xsl:with-param name="at" select="@rend"/>
-		    </xsl:call-template>
-		    <xsl:text>&#xa;</xsl:text>
-		<xsl:apply-templates select="current-group()"/>
-		<xsl:text>&#xa;:::&#xa;</xsl:text>
+		<div class="{@rend}">
+		  <xsl:text>&#xa;</xsl:text>
+		  <xsl:apply-templates select="current-group()"/>
+		  <xsl:text>&#xa;</xsl:text>
+		</div>
 	      </xsl:when>
 	      <xsl:otherwise>
 		<xsl:apply-templates select="current-group()"/>

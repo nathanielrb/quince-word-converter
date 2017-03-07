@@ -16,20 +16,16 @@
 
 (use '[clojure.java.shell :only [sh]])
 
-;   (sh "cp" file "./resources/data")
-
 (defn tei2markdown [str]
   (let [xmldoc (saxon/compile-xml str)
         xsl (saxon/compile-xslt (slurp "./src/w2m/tei2markdown.xsl"))]
-    (saxon/query "distinct-values(document)"
-                 (xsl xmldoc))))
+    (map (fn [doc]
+           {:title (saxon/query "distinct-values(title)" doc)
+            :body (saxon/query "distinct-values(body)" doc)})
+         (saxon/query "documents/document" (xsl xmldoc)))))
 
-;;  (io/file file))
-;; path (.getPath file)
-        
 (defn odt2tei [path]
-  (let [xml-path (str path ".xml")]
-    ;; (sh "rm" xml-path)
+  (let [xml-path (str (str/replace path #"\.odt$" "") ".xml")]
     (sh "php" "-f" "./src/w2m/algone-code/odt2tei/Odt.php" path)
     (slurp xml-path)))
 
@@ -42,6 +38,9 @@
 
 (defn upload-file [params]
   (response {:files (convert-file (get params "file"))}))
+
+(defn test-odt []
+  (odt2markdown "test.odt"))
 
 (defroutes app-routes
   (mp/wrap-multipart-params
