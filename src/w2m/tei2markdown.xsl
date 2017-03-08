@@ -6,7 +6,7 @@
 		xmlns:fn="http://www.w3.org/2005/xpath-functions"
 		exclude-result-prefixes="tei fn">
 
-  <!--  <xsl:output method="text" omit-xml-declaration="no" indent="no"/>-->
+  <!--<xsl:output method="text" omit-xml-declaration="no" indent="no"/>-->
 
   <xsl:preserve-space elements="body"/>
   
@@ -107,11 +107,12 @@
 	  <xsl:for-each-group select="current-group()" group-adjacent="string(@rend)">
 	    <xsl:choose>
 	      <xsl:when test="index-of($blocks, string(@rend))">
-		<div class="{@rend}">
+		<xsl:text>&lt;div class="</xsl:text>
+		<xsl:value-of select="@rend"/>
+		<xsl:text>"&gt;</xsl:text>
 		  <xsl:text>&#xa;</xsl:text>
 		  <xsl:apply-templates select="current-group()"/>
-		  <xsl:text>&#xa;</xsl:text>
-		</div>
+		<xsl:text>&lt;/div&gt;</xsl:text>
 	      </xsl:when>
 	      <xsl:otherwise>
 		<xsl:apply-templates select="current-group()"/>

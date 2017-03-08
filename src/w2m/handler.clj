@@ -35,13 +35,21 @@
   (bytes-to-base64-string
    (slurp-bytes path)))
 
+(defn serialize-to-string [node]
+  (if (string? node)
+    node
+    (let [baos (java.io.ByteArrayOutputStream.)]
+      (saxon/serialize node baos)
+      (String. (.toByteArray baos)))))
+
 (defn tei2markdown [str]
   (let [xmldoc (saxon/compile-xml str)
         xsl (saxon/compile-xslt (slurp "./src/w2m/tei2markdown.xsl"))]
     (map (fn [doc]
            {:title (saxon/query "distinct-values(title)" doc)
             :body  (string-to-base64-string
-                    (saxon/query "distinct-values(body)" doc))})
+                    ;(serialize-to-string
+                     (saxon/query "distinct-values(body)" doc))})
          (saxon/query "documents/document" (xsl xmldoc)))))
 
 (defn get-images [dir]
@@ -112,3 +120,4 @@
 
 
   
+
