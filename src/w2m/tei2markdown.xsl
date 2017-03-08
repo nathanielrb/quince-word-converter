@@ -6,9 +6,11 @@
 		xmlns:fn="http://www.w3.org/2005/xpath-functions"
 		exclude-result-prefixes="tei fn">
 
-  <!--<xsl:output method="text" omit-xml-declaration="yes" indent="no"/>-->
+  <!--  <xsl:output method="text" omit-xml-declaration="no" indent="no"/>-->
 
-  <xsl:variable name="blocks" select="fn:tokenize('sidebar',',')" />
+  <xsl:preserve-space elements="body"/>
+  
+  <xsl:variable name="blocks" select="tokenize('sidebar',',')" />
   
   <xsl:template match="/">
     <documents>
@@ -72,7 +74,7 @@
   
   <xsl:template match="tei:p[@rend != 'figure']">
     <xsl:apply-templates/>
-    <xsl:if test="not(fn:index-of($blocks, string(@rend)))">
+    <xsl:if test="not(index-of($blocks, string(@rend)))">
       <xsl:call-template name="attr">
 	<xsl:with-param name="at" select="@rend"/>
       </xsl:call-template>
@@ -85,7 +87,7 @@
     <xsl:text>![</xsl:text>
 
     <xsl:text>](</xsl:text>
-    <xsl:value-of select="fn:replace(@url, '^.+/','')"/>
+    <xsl:value-of select="replace(@url, '^.+/','')"/>
 
     <xsl:if test="following-sibling::tei:head">
       <xsl:text> "</xsl:text>
@@ -104,7 +106,7 @@
 	<xsl:when test="self::tei:p">
 	  <xsl:for-each-group select="current-group()" group-adjacent="string(@rend)">
 	    <xsl:choose>
-	      <xsl:when test="fn:index-of($blocks, string(@rend))">
+	      <xsl:when test="index-of($blocks, string(@rend))">
 		<div class="{@rend}">
 		  <xsl:text>&#xa;</xsl:text>
 		  <xsl:apply-templates select="current-group()"/>
@@ -146,6 +148,69 @@
     <xsl:text>&gt; </xsl:text>
     <xsl:apply-templates/>
     <xsl:text>&#xa;</xsl:text>
+    <xsl:text>&#xa;</xsl:text>
+  </xsl:template>
+
+  <xsl:template name="cell-width">
+    <xsl:param name="char"><xsl:text> </xsl:text></xsl:param>
+    <xsl:param name="n">
+      <xsl:value-of select="1 + count(preceding-sibling::tei:cell)"/>
+    </xsl:param>
+
+    <xsl:param name="count">
+      <xsl:value-of select="max( ancestor::tei:table/tei:row/tei:cell[position() = $n]/string-length(.) )"/>
+    </xsl:param>
+
+    <xsl:param name="difference">
+      <xsl:value-of select="$count - string-length(.)"/>
+    </xsl:param>
+
+    <xsl:for-each select="1 to $difference">
+      <xsl:value-of select="$char"/>
+    </xsl:for-each>
+    
+  </xsl:template>
+  
+  <xsl:template match="tei:table">
+    <xsl:text>&#xa;</xsl:text>
+    <xsl:apply-templates/>
+    <xsl:text>&#xa;</xsl:text>
+  </xsl:template>
+  
+  <xsl:template match="tei:row">
+    <xsl:text>|</xsl:text>
+    <xsl:apply-templates/>
+    <xsl:text>&#xa;</xsl:text>
+  </xsl:template>
+
+  <xsl:template match="tei:row[@role='label']">
+    <xsl:text>|</xsl:text>
+    <xsl:apply-templates/>
+    <xsl:text>&#xa;</xsl:text>
+    <xsl:text>|</xsl:text>
+    <xsl:apply-templates mode="tableheadersep"/>
+    <xsl:text>&#xa;</xsl:text>
+  </xsl:template>
+
+  <xsl:template  match="tei:row[@role='label']/tei:cell" mode="tableheadersep">
+    <xsl:text>-</xsl:text>
+    <xsl:value-of select="replace(.,'.','-')"/>
+    <xsl:call-template name="cell-width">
+      <xsl:with-param name="char" select="'-'"/>
+    </xsl:call-template>
+    <xsl:text>-|</xsl:text>
+  </xsl:template>
+
+  <xsl:template match="tei:cell">
+    <xsl:text> </xsl:text>
+    <xsl:apply-templates/>
+    <xsl:call-template name="cell-width"/>
+    <xsl:text> |</xsl:text>
+  </xsl:template>
+
+  <xsl:template match="tei:p[@rend='table']">
+    <xsl:text>Table: </xsl:text>
+    <xsl:value-of select="replace(., 'Table [0-9]+: ', '')"/>
     <xsl:text>&#xa;</xsl:text>
   </xsl:template>
   
